@@ -1,0 +1,105 @@
+<?php
+include("header.php");
+?>
+      <body>
+        
+        <div class="p-4 col-6">
+          <div class="card mt-5">
+            <div class="card-body">
+            <table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>No</th>
+				<th>Tanggal Transaksi</th>
+        <th>Nama Pemesan</th>
+				<th>Menu</th>	
+			</tr>
+		</thead>
+    
+		<tbody>
+        <?php
+            include("koneksi/koneksi.php");
+
+            $query = "SELECT PenjualanID, TanggalPenjualan FROM penjualan ORDER BY PenjualanID DESC LIMIT 1";
+            $result = mysqli_query($con, $query);
+            
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo "<tr>";
+                echo "<td>" . $row['PenjualanID'] . "</td>";
+                echo "<td>" . $row['TanggalPenjualan'] . "</td>";
+                ?>
+                <td>
+                  <?php
+                  $query1 = "SELECT NamaPelanggan FROM pelanggan WHERE PelangganID = '".$row['PenjualanID']."'";
+                  $result1 = mysqli_query($con, $query1);
+                  
+                  while ($row1 = mysqli_fetch_assoc($result1)) {
+                    echo $row1['NamaPelanggan'];
+                  }
+                  ?>
+                </td>
+                <td>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nama Produk</th>
+                                <th class="col-1">Jumlah</th>
+                                <th class="col-1">Harga</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                            // Fetch details for the current Penjualan
+                            $query2 = "SELECT ProdukID, PenjualanID, JumlahProduk, Subtotal FROM detail_penjualan WHERE DetailID = '" . $row['PenjualanID'] . "'";
+                            $result2 = mysqli_query($con, $query2);
+
+                            // Inisialisasi total harga
+                            $totalHarga = 0;
+
+                            while ($detailrow = mysqli_fetch_assoc($result2)) {
+                                echo "<tr>";
+                                
+                                // Fetch NamaProduk
+                                $query3 = "SELECT nama_produk FROM produk WHERE ProdukID = '" . $detailrow['ProdukID'] . "' ";
+                                $result3 = mysqli_query($con, $query3);
+
+                                while ($row2 = mysqli_fetch_assoc($result3)) {
+                                    echo "<td>" . $row2['nama_produk'] . "</td>";
+                                }
+
+                                echo "<td>" . $detailrow['JumlahProduk'] . " Pcs</td>";
+                                echo "<td>RP." . number_format($detailrow['Subtotal']) . ",00</td>";
+                                echo "</tr>";
+
+                                // Tambahkan Subtotal ke total harga
+                                $totalproduk = $detailrow['JumlahProduk'] * $detailrow['Subtotal'];
+                                $totalHarga += $totalproduk;
+                            }
+
+                            // Menampilkan total harga di luar loop
+                            echo "<tr>";
+                            echo "<td colspan='2'><strong>Total Harga:</strong></td>";
+                            echo "<td colspan='3'><strong>RP." . number_format($totalHarga) . ",00</strong></td>";
+                            echo "</tr>";
+                        ?>
+                            
+                        </tbody>
+                    </table>
+                </td>
+                <?php
+                echo "</tr>";
+              }
+              
+        ?>
+		</tbody>
+	</table>
+            </div>
+          </div>
+        </div>
+      </body>
+      
+      <script>
+        window.print()
+      </script>
+
+      
